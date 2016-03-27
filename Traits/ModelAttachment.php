@@ -28,7 +28,7 @@ trait ModelAttachment
 		else
 			$this->upload_path = $this->public_path.DIRECTORY_SEPARATOR.'upload';
 
-		// get relative path
+		// get relative address from upload path
 		if (strpos($this->upload_path, $this->public_path) !== false)
 			$this->upload_relative_path = ltrim(str_replace($this->public_path, '', $this->upload_path) , DIRECTORY_SEPARATOR);
 
