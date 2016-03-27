@@ -40,7 +40,8 @@ trait ModelAttachment
 	}
 
 
-	function getAttachmentFieldName(){
+	function getAttachmentFieldName()
+	{
 		return 'attachments';
 	}
 
@@ -73,7 +74,7 @@ trait ModelAttachment
 	{
 		$attachments = (array)$this->getAttachment();
 
-		foreach ((array) $this->attach as $key) {
+		foreach ((array)$this->attach as $key) {
 
 			if (isset($files[$key])) {
 
