@@ -26,6 +26,21 @@ if (!function_exists('array_diff_key_recursive')) {
 	}
 }
 
+
+if (!function_exists('to_array')) {
+	/**
+	 * convert object to array
+	 * @param $value
+	 * @return array
+	 */
+	function to_array($value)
+	{
+		if (is_object($value) && method_exists($value, 'toArray'))
+			$value = $value->toArray();
+		return (array)$value;
+	}
+}
+
 if (!function_exists('array_undot')) {
 	/**
 	 * Collapse the given dots array to associative array
@@ -42,4 +57,34 @@ if (!function_exists('array_undot')) {
 
 		return $results;
 	}
+}
+
+
+if (!function_exists('is_first')) {
+	/**
+	 * chcek whether the given value is the first item  of given Array
+	 * @param $value
+	 * @param $Array
+	 */
+	function is_first($value, $array)
+	{
+		return $value ==collect($array)->first(function ($k, $v) {
+			return true;
+		});
+	}
+}
+
+if (!function_exists('is_last')) {
+	/**
+	 * chcek whether the given value is the last item  of given Array
+	 * @param $value
+	 * @param $Array
+	 */
+	function is_last($value, $array)
+	{
+		return $value ==collect($array)->reverse()->first(function ($k, $v) {
+			return true;
+		});
+	}
+
 }

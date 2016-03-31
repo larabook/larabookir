@@ -160,7 +160,7 @@ if (!function_exists('button_destroy')) {
 			$action=url($path);
 
 		//setup output
-		$return ='<form method="POST" action="'.$action.'"  accept-charset="UTF-8" style="display: inline-block;">';
+		$return ='<form name="button-destroy" method="POST" action="'.$action.'"  accept-charset="UTF-8" style="display: inline-block;">';
 		$return .='<input name="_method" type="hidden" value="DELETE">';
 		$return .='<input name="_token" type="hidden" value="'.csrf_token().'">';
 		$return .= '<button type="submit" class="btn btn-sm btn-danger confirm delete" data-title="';

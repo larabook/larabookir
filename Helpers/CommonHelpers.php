@@ -298,57 +298,6 @@ if (!function_exists('is_creating')) {
 	}
 }
 
-if (!function_exists('is_first')) {
-	/**
-	 * chcek whether the given key is the first index  of given Array
-	 * @param $key
-	 * @param $Array
-	 */
-	function is_first($key, $array)
-	{
-		static $first_key;
-		if (is_object($array)) {
-			if (method_exists($array, 'toArray'))
-				$array = $array->toArray();
-			else
-				$array = (array)$array;
-		}
-		if (!is_array($array))
-			return false;
-		if (!isset($first_key)) {
-			reset($array);
-			$first_key = key($array);
-		}
-		return $key == $first_key;
-	}
-}
-
-
-if (!function_exists('is_last')) {
-	/**
-	 * chcek whether the given key is the last index  of given Array
-	 * @param $key
-	 * @param $Array
-	 */
-	function is_last($key, $array)
-	{
-		static $last_key;
-		if (is_object($array)) {
-			if (method_exists($array, 'toArray'))
-				$array = $array->toArray();
-			else
-				$array = (array)$array;
-		}
-		if (!is_array($array))
-			return false;
-		if (!isset($last_key)) {
-			end($array);
-			$last_key = key($array);
-		}
-		return $key == $last_key;
-	}
-
-}
 
 
 if (!function_exists('get_client_ip')) {

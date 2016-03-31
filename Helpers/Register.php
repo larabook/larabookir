@@ -5,3 +5,4 @@ include_once "UrlHelpers.php";
 include_once "FormatterHelpers.php";
 include_once "HtmlHelpers.php";
 include_once "ButtonsHelpers.php";
+include_once "ArrayHelpers.php";
