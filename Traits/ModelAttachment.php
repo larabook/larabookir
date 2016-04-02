@@ -83,7 +83,7 @@ trait ModelAttachment
 					// فایل قبلی آن باید حذف شود
 					$this->attachment_delete($key, false);
 
-					$attachments[$key] = $this->attachment_upload($files[$key]);
+					$attachments[$key] = $this->attachment_upload($files[$key],$key);
 				}
 			}
 		}
@@ -91,7 +91,7 @@ trait ModelAttachment
 	}
 
 
-	private function attachment_upload(UploadedFile $file, $new_name = null)
+	private function attachment_upload(UploadedFile $file, $key , $new_name = null)
 	{
 		if ($new_name) {
 
@@ -114,6 +114,26 @@ trait ModelAttachment
 
 	}
 
+
+	/**
+	 * Resize Image
+	 * Dependency with \Intervention\Image\ImageManager
+	 * @param UploadedFile $file
+	 * @param $width
+	 * @param $height
+	 * @return int : returns the file is uploaded or false on failure
+	 */
+	public function resize(UploadedFile $file, $width, $height)
+	{
+		if(app('image') && app('image') instanceof \Intervention\Image\ImageManager) {
+			$img = app('image')->make($file->getPathname())->resize($width, $height);
+
+			return file_put_contents($file->getPathname(), $img->encode());
+		}else
+			throw new \Exception("Intervention Image class doesn't exist");
+
+	}
+	
 	/**
 	 * Delete Attachments attachment
 	 * @param $field
