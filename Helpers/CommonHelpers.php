@@ -11,6 +11,19 @@ if (!function_exists('is_md5')) {
 	}
 }
 
+if (!function_exists('is_json')) {
+	/**
+	 * Check if md5
+	 * @return bool
+	 */
+	function is_json($str)
+	{
+		json_decode($str);
+
+		return (json_last_error() === JSON_ERROR_NONE);
+	}
+}
+
 if (!function_exists('rmkdir')) {
 	/**
 	 * Make directory recursive
@@ -68,12 +81,57 @@ if (!function_exists('is_base64')) {
 	 */
 	function is_base64($data)
 	{
-		if (preg_match("/^[a-zA-Z0-9\!\-_]+$/", $data))
+		if (preg_match('/^[a-zA-Z0-9\+\/]+\=*$/', $data))
 			return true;
 		return false;
 	}
 }
 
+if (!function_exists('is_base64_file')) {
+	/**
+	 * check if is base64
+	 * @param $data
+	 * @return bool
+	 */
+	function is_base64_file($data)
+	{
+		return preg_match('/^data\:\s*(?:[a-zA-Z]+\/[a-zA-Z]+);base64\,(?:[a-zA-Z0-9\+\/]+\=*)$/', $data)?true:false;
+	}
+}
+
+if (!function_exists('base64_decode_file')) {
+	/**
+	 * Decodes base64 encoded file string
+	 * @param $data
+	 * @return bool
+	 */
+	function base64_decode_file($data)
+	{
+		if(preg_match('/^data\:\s*([a-zA-Z]+\/[a-zA-Z]+);base64\,([a-zA-Z0-9\+\/]+\=*)$/', $data, $matches)) {
+			return [
+					'mime' => $matches[1],
+					'data' => base64_decode($matches[2]),
+			];
+		}
+		return false;
+	}
+}
+
+if (!function_exists('base64_encode_file')) {
+	/**
+	 * Returns encoded file string
+	 * @param $file_path
+	 * @return string
+	 */
+	function base64_encode_file($file_path,$mime=null)
+	{
+		// Read image path, convert to base64 encoding
+		$data = file_get_contents($file_path);
+		$mime = $mime?:(@mime_content_type($data)?:'text/plain');
+		// Format the file to: data:{mime};base64,{data};
+		return 'data:' . $mime . ';base64,' . base64_encode($data);
+	}
+}
 
 if (!function_exists('is_serialized')) {
 	/**
@@ -124,45 +182,6 @@ if (!function_exists('dd_next_query')) {
 			}
 			dd($res);
 		});
-	}
-}
-
-
-if (!function_exists('parse_args')) {
-	/**
-	 * Parsing Sequential arguments
-	 * @param $args
-	 * @return array
-	 */
-
-	function parse_args($args)
-	{
-		if (!$args)
-			return [];
-		if (is_array($args[0]))
-			return $args[0];
-		else
-			return $args;
-	}
-}
-
-
-if (!function_exists('parse_argse_assoc')) {
-	/**
-	 * Parsing associative arguments
-	 * @param $args
-	 * @return array
-	 */
-	function parse_argse_assoc($args)
-	{
-		if (isset($args[0]) && isset($args[1]) && !is_array($args[0])) {
-			$args[$args[0]] = $args[1];
-			unset($args[0]);
-			unset($args[1]);
-		} else { // is array
-			$args = $args[0];
-		}
-		return $args;
 	}
 }
 
@@ -454,17 +473,38 @@ if (!function_exists('str_unique_uslug')) {
 	 *
 	 * @param $title
 	 * @param $model
+	 * @param $field
 	 * @return mixed|string
 	 */
-	function str_unique_uslug($title, $model)
+	function str_unique_uslug($title, $model,$field='slug')
 	{
 		$slug = str_uslug($title);
-		$slugCount = count($model->whereRaw("slug REGEXP '^{$slug}(-[0-9]*)?$'")->get());
+		$slugCount = count($model->whereRaw($field." REGEXP '^{$slug}(-[0-9]*)?$'")->get());
 
 		return ($slugCount > 0) ? "{$slug}-{$slugCount}" : $slug;
 	}
 }
 
+
+
+if (!function_exists('str_unique_random')) {
+	/**
+	 * Generate a unique random string
+	 *
+	 * @param $title
+	 * @param $model
+	 * @param $field
+	 * @return mixed|string
+	 */
+	function str_unique_random($length = 16, $model,$field='rand')
+	{
+		$rand = strtolower(str_random($length));
+		while($model->where($field,$rand)->count()) {
+			$rand = str_random($length);
+		}
+		return $rand;
+	}
+}
 
 if (!function_exists('fix_persian_num')) {
 	/**
@@ -522,3 +562,29 @@ if (!function_exists('validation_state')) {
 	}
 }
 
+if (!function_exists('select_raw')) {
+	/**
+	 * Set the columns to be selected.
+	 *
+	 * @param  array $columns
+	 * @return mixed
+	 */
+	function select_raw($columns = ['1 as res'], $binding=[], $raw=true)
+	{
+		if($raw)
+			array_walk( $columns,function (&$v) {
+				$v = \DB::raw($v);
+			});
+
+		$db = app('db');
+		$processor = $db->getPostProcessor();
+		$query= (new Illuminate\Database\Query\Builder(current($db->getConnections()), $db->getQueryGrammar(), $processor))
+				->select((array)$columns);
+
+		if ($binding) {
+			foreach($binding as $bind)
+				$query->mergeBindings($bind);
+		}
+		return $query;
+	}
+}

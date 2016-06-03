@@ -9,6 +9,7 @@
 namespace App\Larabookir\Traits;
 
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 trait ModelAttachment
@@ -80,18 +81,23 @@ trait ModelAttachment
 
 				if ($files[$key] instanceof UploadedFile && $files[$key]->isValid()) {
 
+					// First we will check for the presence of a mutator for the set operation
+					if ($this->hasSetMutator('Attachment' . $key)) {
+						$method = 'set' . Str::studly('Attachment' . $key) . 'Attribute';
+
+						$this->{$method}($files[$key]);
+					}
+
 					// فایل قبلی آن باید حذف شود
 					$this->attachment_delete($key, false);
-
-					$attachments[$key] = $this->attachment_upload($files[$key],$key);
+					$attachments[$key] = $this->attachment_upload($files[$key], $key);
 				}
 			}
 		}
 		$this->attributes[$this->getAttachmentFieldName()] = json_encode($attachments);
 	}
 
-
-	private function attachment_upload(UploadedFile $file, $key , $new_name = null)
+	private function attachment_upload(UploadedFile $file, $key, $new_name = null)
 	{
 		if ($new_name) {
 
@@ -111,9 +117,7 @@ trait ModelAttachment
 			return $new_name;
 
 		return false;
-
 	}
-
 
 	/**
 	 * Resize Image
@@ -123,17 +127,22 @@ trait ModelAttachment
 	 * @param $height
 	 * @return int : returns the file is uploaded or false on failure
 	 */
-	public function resize(UploadedFile $file, $width, $height)
+	public function resize(UploadedFile $file, $width = null, $height = null, $callback = null)
 	{
-		if(app('image') && app('image') instanceof \Intervention\Image\ImageManager) {
-			$img = app('image')->make($file->getPathname())->resize($width, $height);
+		if (!$callback)
+			$callback = function ($constraint) {
+				$constraint->aspectRatio();
+			};
+
+		if (app('image') && app('image') instanceof \Intervention\Image\ImageManager) {
+
+			$img = app('image')->make($file->getPathname())->resize($width, $height, $callback);
 
 			return file_put_contents($file->getPathname(), $img->encode());
-		}else
+		} else
 			throw new \Exception("Intervention Image class doesn't exist");
-
 	}
-	
+
 	/**
 	 * Delete Attachments attachment
 	 * @param $field

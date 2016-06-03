@@ -84,10 +84,11 @@ if (!function_exists('url_queries')) {
 		if ($changes)
 			$url = url_modify($changes, $url);
 
-		$params = [];
 		if ($psign = strpos($url, '?')) {
 			return substr($url, $psign + 1);
 		}
+
+		return null;
 	}
 }
 

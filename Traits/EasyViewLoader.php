@@ -27,7 +27,7 @@ trait EasyViewLoader
 class Factory implements FactoryContract
 {
     public $factory;
-    public $data = [];
+    public $_data = [];
 
 
     function __construct($factory)
@@ -45,9 +45,9 @@ class Factory implements FactoryContract
     public function with($key, $value = null)
     {
         if (is_array($key)) {
-            $this->data = array_merge($this->data, $key);
+            $this->_data = array_merge($this->_data, $key);
         } else {
-            $this->data[$key] = $value;
+            $this->_data[$key] = $value;
         }
 
         return $this;
@@ -117,7 +117,7 @@ class Factory implements FactoryContract
      */
     public function getData()
     {
-        return $this->data;
+        return $this->_data;
     }
 
 
@@ -129,7 +129,7 @@ class Factory implements FactoryContract
      */
     public function &__get($key)
     {
-        return $this->data[$key];
+        return $this->_data[$key];
     }
 
     /**
@@ -152,7 +152,7 @@ class Factory implements FactoryContract
      */
     public function __isset($key)
     {
-        return isset($this->data[$key]);
+        return isset($this->_data[$key]);
     }
 
     /**
@@ -163,7 +163,7 @@ class Factory implements FactoryContract
      */
     public function __unset($key)
     {
-        unset($this->data[$key]);
+        unset($this->_data[$key]);
     }
 
     /**
@@ -185,7 +185,7 @@ class Factory implements FactoryContract
      * @return \Illuminate\Contracts\View\View
      */
     public function file($path, $data = array(), $mergeData = array()){
-        return $this->factory->file($path, $this->data, array_merge($data, $mergeData));
+        return $this->factory->file($path, $this->_data, array_merge($data, $mergeData));
     }
     /**
      * Get the evaluated view contents for the given view.
@@ -196,7 +196,7 @@ class Factory implements FactoryContract
      * @return \Illuminate\Contracts\View\View
      */
     public function make($view, $data = array(), $mergeData = array()){
-        return $this->factory->make($view, $this->data, array_merge($data, $mergeData));
+        return $this->factory->make($view, $this->_data, array_merge($data, $mergeData));
     }
 
     /**

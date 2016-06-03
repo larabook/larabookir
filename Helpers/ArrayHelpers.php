@@ -88,3 +88,43 @@ if (!function_exists('is_last')) {
 	}
 
 }
+
+
+
+if (!function_exists('parse_args')) {
+	/**
+	 * Parsing Sequential arguments
+	 * @param $args
+	 * @return array
+	 */
+
+	function parse_args($args)
+	{
+		if (!$args)
+			return [];
+		if (is_array($args[0]))
+			return $args[0];
+		else
+			return $args;
+	}
+}
+
+
+if (!function_exists('parse_args_assoc')) {
+	/**
+	 * Parsing associative arguments
+	 * @param $args
+	 * @return array
+	 */
+	function parse_args_assoc($args)
+	{
+		if (isset($args[0]) && isset($args[1]) && !is_array($args[0])) {
+			$args[$args[0]] = $args[1];
+			unset($args[0]);
+			unset($args[1]);
+		} else { // is array
+			$args = $args[0];
+		}
+		return $args;
+	}
+}

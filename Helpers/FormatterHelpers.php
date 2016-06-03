@@ -13,6 +13,7 @@ if (!function_exists('to_price')) {
 	function to_price($amount, $locale = 'fa_IRT')
 	{
 		$shema = array(
+			'dollar' => array('$', '', 2, '.', ',', 0),          //  United State
 			'en_US' => array('$', ' USD', 2, '.', ',', 0),          //  United State
 			'en_AU' => array('$', ' AU', 2, '.', ' ', 0),          //  Australian Dollar
 			'en_CA' => array('$', ' CAD', 2, '.', ',', 0),          //  Canadian Dollar
