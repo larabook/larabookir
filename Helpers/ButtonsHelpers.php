@@ -169,7 +169,7 @@ if (!function_exists('button_destroy')) {
 		$return .= $message;
 		$return .= '" title="';
 		$return .= $buttonTitle;
-		$return .= '"><i class="fa fa-times"></i></a>';
+		$return .= '"><i class="fa fa-times"></i>';
 		$return .= '</form>';
 		//return
 		return $return;
