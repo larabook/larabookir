@@ -7,31 +7,31 @@
  * 1- create a validation meta class in /App/Metas/Validation/ folder
  *
  * class ContactUs {
- *	function rules()
- *	{
- *		return [
- *				'creating'=>[
- *						# Validation rules for inserting data
- *				],
- *				'updating'=>[
- *						# Validation rules for updating data
- *				]
- *		];
- *	}
- *	function messages()
- *	{
- *		return [];
- *	}
- *	function attributes()
- *	{
- *		return [];
- *	}
+ *    function rules()
+ *    {
+ *        return [
+ *                'create'=>[
+ *                        # Validation rules for inserting data
+ *                ],
+ *                'update'=>[
+ *                        # Validation rules for update data
+ *                ]
+ *        ];
+ *    }
+ *    function messages()
+ *    {
+ *        return [];
+ *    }
+ *    function attributes()
+ *    {
+ *        return [];
+ *    }
  * }
  *
  * 2- in your request class write these lines
  *
- *      	use ModelValidator;
- *	        protected $validator_meta= \App\Metas\Validation\Post::class; # i.e we are using validation for
+ *        use ModelValidator;
+ *            protected $validator_meta= \App\Metas\Validation\Post::class; # i.e we are using validation for
  *
  * 3- then Laravel checks your request is valid of not
  */
@@ -39,34 +39,43 @@
 namespace App\Larabookir\Traits;
 
 
+use App\Models\Model;
+
 trait RequestValidator
 {
-	public function validator($factory){
-		// create new instance of meta path
-		$meta=null;
-		if($this->validator_meta)
-		$meta = new $this->validator_meta;
 
-		// Fills rules from meta
-		if (method_exists($meta, 'rules'))
-			$rules=$this->translateRules((array)$meta->rules());
-		else
-			$rules=$this->container->call([$this, 'rules']);
+	abstract function ruleModel();
+
+	protected function getModelRules($method = null)
+	{
+
+		$modelName = $this->ruleModel();
+
+		$rules = eval("return \\{$modelName}::\$rules;");
+
+		if (isset($method))
+			return $rules[$method];
+
+		return $method;
+	}
+
+	public function validator($factory)
+	{
+
+		$rules = $this->translateRules((array)$this->rules());
 
 		// Fills custom messages from meta
-		if (method_exists($meta, 'messages'))
-			$messages=(array)$meta->messages();
-		else
-			$messages=$this->messages();
+		$messages = [];
+		if (method_exists($this, 'messages'))
+			$messages = (array)$this->messages();
 
-		// Fills custom messages from meta
-		if (method_exists($meta, 'messages')) {
-			$attributes=(array)$meta->messages();
-		}else
-			$attributes=$this->attributes();
+		// Fills custom attributes from meta
+		$attributes = [];
+		if (method_exists($this, 'attributes'))
+			$attributes = $this->attributes();
 
 		return $factory->make(
-				$this->all(), $rules , $messages, $attributes
+			$this->all(), $rules, $messages, $attributes
 		);
 	}
 
@@ -78,21 +87,38 @@ trait RequestValidator
 	private function translateRules(array $rules)
 	{
 
-		$performs=in_array($this->method(),['PUT','PATCH'])?'updating':($this->isMethod('post')?'creating':null);
+		$performs = in_array($this->method(), ['PUT', 'PATCH']) ? 'update' : ($this->isMethod('post') ? 'create' : null);
 
-		// detect creating|updating rules
+		// detect create|update rules
 		if (isset($rules[$performs])) {
 			$rules = $rules[$performs];
 		} else {
-			unset($rules['creating']);
-			unset($rules['updating']);
+			unset($rules['create']);
+			unset($rules['update']);
 		}
-		
-		$parameters =(array) @$this->container->router->current()->parameters();
-		$parameters =array_merge($parameters, (array)$this->all());
+
+		$parameters = [];
+
+
+		foreach ((array)@$this->container->router->current()->parameters() as $key => $value) {
+			// اگر مدلی هم نام با نام پارامتر پیدا شد
+			if (preg_match('/.*\\\?' . preg_quote(studly_case($key)) . '$/', $this->ruleModel())) {
+
+				// سپس یک نمونه از آن مدل بساز
+				$instance = $this->container->make($this->ruleModel());
+
+				// با توجه به شماره ID درخواستی رکورد را پیدا کن
+				// اگر رکورد پیدا شد تمامی فیلد های آن رکورد را در متغیر پامتر بریز
+				if ($model = $instance->where($instance->getRouteKeyName(), $value)->first()) {
+
+					$parameters = $model->toArray();
+
+				}
+			}
+		}
 
 		foreach ($rules as &$rule) {
-			$rule = preg_replace_callback('/{(\w*)}/i', function ($matches) use($parameters) {
+			$rule = preg_replace_callback('/{(\w*)}/i', function ($matches) use ($parameters) {
 				// replace attribute value to
 				if (isset($parameters[$matches[1]]) && ($val = $parameters[$matches[1]]))
 					return $val;
@@ -100,6 +126,7 @@ trait RequestValidator
 					return "null";
 			}, $rule);
 		}
+
 		return $rules;
 	}
 }
