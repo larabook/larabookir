@@ -195,11 +195,11 @@ if (!function_exists('posts_all')) {
 	{
 		$args = parse_args(func_get_args());
 		if ($args)
-			$all =  $request->only($args);
+			$all =  request()->only($args);
 		else
-			$all =  $request->all();
+			$all =  request()->all();
 
-		$queries =  $request->query();
+		$queries =  request()->query();
 		return array_diff_key_recursive($all, $queries);
 	}
 }
@@ -209,14 +209,13 @@ if (!function_exists('posts_except')) {
 
 	function posts_except()
 	{
-		$request=app('request');
 		$args = parse_args(func_get_args());
 		if ($args)
-			$all = $request->except($args);
+			$all = request()->except($args);
 		else
-			$all = $request->input();
+			$all = request()->input();
 
-		$queries =  $request->query();
+		$queries =  request()->query();
 		return array_diff_key_recursive($all, $queries);
 	}
 
