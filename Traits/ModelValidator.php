@@ -138,13 +138,13 @@ trait ModelValidator
 	 */
 	private function translateRules(array $rules)
 	{
-		$performs = $this->exists ? 'updating' : 'creating';
-		// detect creating|updating rules
+		$performs = $this->exists ? 'update' : 'create';
+		// detect create|update rules
 		if (isset($rules[$performs])) {
 			$rules = $rules[$performs];
 		} else {
-			unset($rules['creating']);
-			unset($rules['updating']);
+			unset($rules['create']);
+			unset($rules['update']);
 		}
 
 		foreach ($rules as &$rule) {
