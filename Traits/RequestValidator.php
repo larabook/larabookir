@@ -87,7 +87,7 @@ trait RequestValidator
 
 			// سپس یک نمونه از آن مدل بساز
 			$instance = $this->container->make($modelName);
-		 
+
 			// با توجه به شماره ID درخواستی رکورد را پیدا کن
 			// اگر رکورد پیدا شد تمامی فیلد های آن رکورد را در متغیر پامتر بریز
 			if(	method_exists($this,'getRouteKeyName'))
@@ -96,7 +96,7 @@ trait RequestValidator
 				$routeKeyName=$instance->getRouteKeyName();
 
 			$route=$this->container->router->current();
-			
+
 			if($route->hasParameter($routeKeyName)) {
 
 
@@ -106,8 +106,9 @@ trait RequestValidator
 			}
 		}
 
+
 		foreach ($rules as &$rule) {
-			$rule = preg_replace_callback('/{(\w*)}/i', function ($matches) use ($parameters) {
+			$rule = preg_replace_callback('/{{(\w*)}}/i', function ($matches) use ($parameters) {
 				// replace attribute value to
 				if (isset($parameters[$matches[1]]) && ($val = $parameters[$matches[1]]))
 					return $val;
@@ -115,7 +116,7 @@ trait RequestValidator
 					return "null";
 			}, $rule);
 		}
-		
+
 		return $rules;
 	}
 }
