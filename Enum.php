@@ -3,7 +3,7 @@ namespace App\Larabookir;
 
 abstract class Enum
 {
-	private $consts = [], $attributes = [];
+	protected $consts = [], $attributes = [];
 
 	protected $translations = [];
 
@@ -81,6 +81,16 @@ abstract class Enum
 	}
 
 	/**
+	 * @param $const
+	 * @param bool|false $html
+	 * @return mixed
+	 */
+	public static function getlabel($const, $html = false)
+	{
+		return self::singelton()->translate($const, $html);
+	}
+
+	/**
 	 * Gets label list
 	 * @param array $except
 	 * @param bool|false $html
@@ -91,7 +101,7 @@ abstract class Enum
 		$list = [];
 
 		foreach (self::singelton()->consts as $name => $const)
-			$list[$const] = self::singelton()->translate($const, $html);
+			$list[$const] = self::getLabel($const, $html);
 
 		return $list;
 	}
@@ -107,12 +117,15 @@ abstract class Enum
 		return array_except(self::getLabels($html), (array)$except);
 	}
 
-	/**
-	 * Gets the constatns list mentioned in first parameter
-	 * @param array $only
-	 * @param bool|false $style
-	 * @return array
-	 */
+    /**
+     * Gets the constants list mentioned in first parameter
+     *
+     * @param array $only
+     * @param bool $html
+     *
+     * @return array
+     * @internal param bool|false $style
+     */
 	public static function getLabelsOnly($only = [], $html = false)
 	{
 		return array_only(self::getLabels($html), (array)$only);
@@ -153,7 +166,7 @@ abstract class Enum
 	}
 
 	/**
-	 * Gets constans slug list
+	 * Gets constant slug list
 	 * @param array $except
 	 * @return array
 	 */
@@ -193,15 +206,34 @@ abstract class Enum
 		return in_array(strtolower($name), $keys);
 	}
 
+    /**
+     * Checks whether the given value exists
+     * @return array
+     * @internal param $value
+     */
+	public static function getValues()
+	{
+		return array_values(self::singelton()->consts);
+	}
+
+	/**
+	 * Checks whether the given value exists
+     * @return array
+     * @internal param $value
+	 */
+	public static function getValuesExcept($except = [])
+	{
+		return array_except(self::getValues(), (array)$except);
+	}
+
 	/**
 	 * Checks whether the given value exists
 	 * @param $value
-	 * @return bool
-	 */
+	* @return bool
+	*/
 	public static function valueExists($value)
 	{
-		$values = array_values(self::singelton()->consts);
-		return in_array($value, $values, true);
+		return in_array($value, self::getValues(), true);
 	}
 
 	/**
